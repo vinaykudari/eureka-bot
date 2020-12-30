@@ -101,7 +101,6 @@ class EurekaBot(Controller):
     def move_forward(self, acceleration=0, duration=3):
         self.set_move_direction(direction=Direction.forward)
         self.move(duration=duration, acceleration=acceleration)
-        print('done')
         if duration > 0: self.stop()
 
     def move_backward(self, acceleration=0, duration=3):
