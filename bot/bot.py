@@ -12,12 +12,12 @@ class Direction(enum.Enum):
 
 class EurekaBot(Controller):
     def __init__(
-        self,
-        min_speed=10,
-        max_speed=100,
-        turn_speed=20,
-        default_speed=20,
-        acceleration_duration=0.1,
+            self,
+            min_speed=10,
+            max_speed=100,
+            turn_speed=30,
+            default_speed=50,
+            acceleration_duration=0.1,
     ):
         super().__init__(gpio_left_pin=15, gpio_right_pin=22)
         self.min_speed = min_speed
@@ -54,8 +54,6 @@ class EurekaBot(Controller):
         else:
             self._accelerate(acceleration=acceleration)
 
-        print(f'acc={self.current_acceleration}')
-
     def turn(self, duration, speed=0):
         start_time = time.time()
         while time.time() - start_time <= duration:
@@ -67,7 +65,6 @@ class EurekaBot(Controller):
 
     def _get_rotation_duration(self, speed, angle):
         duration = (self.rotation_constant * angle) / speed
-        # print(f'duration = {duration}, angle={angle}')
         return round(duration, 2)
 
     def _set_rotation_direction(self, direction):
@@ -77,6 +74,12 @@ class EurekaBot(Controller):
         else:
             self._set_pin_value(self.direction_pins['left'], Direction.backward.value)
             self._set_pin_value(self.direction_pins['right'], Direction.forward.value)
+
+    def set_move_direction(self, direction):
+        if direction == Direction.forward:
+            self._set_pin_value(self.direction_pins.values(), Direction.forward.value)
+        elif direction == Direction.backward:
+            self._set_pin_value(self.direction_pins.values(), Direction.backward.value)
 
     def rotate(self, angle=0, duration=0, speed=0, direction='clockwise'):
         self._set_rotation_direction(direction=direction)
@@ -92,24 +95,24 @@ class EurekaBot(Controller):
             while self.current_speed > self.min_speed:
                 self._accelerate(acceleration=-self.current_acceleration / self.friction)
         self.current_speed = 0
+        self.current_acceleration = 0
         self._set_speed(side='both', speed=self.current_speed)
 
     def move_forward(self, acceleration=0, duration=3):
-        # Set direction
-        self._set_pin_value(self.direction_pins.values(), Direction.forward.value)
-        self.current_acceleration = acceleration
+        self.set_move_direction(direction=Direction.forward)
         self.move(duration=duration, acceleration=acceleration)
-        self.stop()
+        print('done')
+        if duration > 0: self.stop()
 
     def move_backward(self, acceleration=0, duration=3):
-        # Set direction
-        self._set_pin_value(self.direction_pins.values(), Direction.backward.value)
-        self.current_acceleration = acceleration
+        self.set_move_direction(direction=Direction.backward)
         self.move(duration=duration, acceleration=acceleration)
-        self.stop()
+        if duration > 0: self.stop()
 
     def move_left(self, speed=0, angle=90):
         self.rotate(angle=angle, speed=speed, direction='anti-clockwise')
+        self.stop()
 
     def move_right(self, speed=0, angle=90):
         self.rotate(angle=angle, speed=speed, direction='clockwise')
+        self.stop()
