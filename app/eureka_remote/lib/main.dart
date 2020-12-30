@@ -1,4 +1,5 @@
-import 'package:eureka_remote/screens/home.dart';
+import 'package:eureka_remote/screens/find_bot_screen.dart';
+import 'package:eureka_remote/screens/home_screen.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:flutter/material.dart';
 
@@ -12,9 +13,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: title,
-      home: HomeScreen(
-        title: title,
-        channel: IOWebSocketChannel.connect(endpoint),
+      home: FindBotScreen(
         endpoint: endpoint,
       ),
     );

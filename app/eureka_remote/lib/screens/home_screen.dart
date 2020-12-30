@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Container(
                   padding: EdgeInsets.fromLTRB(0, 250, 0, 250),
                   alignment: Alignment.center,
-                  child: FlatButton(
+                  child: RaisedButton(
                     onPressed: () {
                       setState(() {
                         _channel = IOWebSocketChannel.connect(widget.endpoint);
