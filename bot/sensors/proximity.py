@@ -7,6 +7,7 @@ class Proximity:
         self.port = port
         self.threshold = threshold
         self.bus = smbus.SMBus(port)
+        self.proximity = 0
 
         try:
             self._initialize_sensor()
@@ -19,5 +20,6 @@ class Proximity:
         self.apds.enableProximitySensor()
 
     def get_proximity(self):
-        return self.apds.readProximity()
+        self.proximity = self.apds.readProximity()
+        return self.proximity
 
