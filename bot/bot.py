@@ -32,10 +32,7 @@ class EurekaBot(Controller):
         self.rotation_constant = 0.175
 
     def _get_speed(self, acceleration):
-        if acceleration != 0:
-            speed = self.current_speed + acceleration * self.acceleration_duration
-        else:
-            speed = self.default_speed
+        speed = self.current_speed + acceleration * self.acceleration_duration
         return min(max(round(speed, 2), 0), self.max_speed)
 
     def _accelerate(self, acceleration):

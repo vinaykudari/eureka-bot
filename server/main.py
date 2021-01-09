@@ -1,10 +1,8 @@
 import os
 import sys
 
-import cv2
-import nanocamera as nano
+import asyncio
 from fastapi import FastAPI, WebSocket
-from starlette.responses import StreamingResponse
 from starlette.websockets import WebSocketDisconnect
 
 PACKAGE_PARENT = '..'
@@ -13,16 +11,28 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 from bot.sensors.proximity import Proximity
 from bot.bot import EurekaBot
+from server.tasks import Tasks
 
 app = FastAPI()
+
+front_proximity = Proximity(port=0, threshold=100)
+rear_proximity = Proximity(port=1, threshold=100)
+
 bot = EurekaBot()
-proximity_front = Proximity(port=0, threshold=100)
-proximity_back = Proximity(port=1, threshold=100)
+tasks = Tasks(
+    front_proximity=front_proximity,
+    rear_proximity=rear_proximity,
+    proximity_threshold=60,
+    bot=bot,
+)
+
+loop = asyncio.get_event_loop()
+loop.create_task(tasks.get_proximity())
+loop.create_task(tasks.check_proximity())
 
 
 def act(x, y, turn_left, turn_right, speed):
-    if speed > 0:
-        bot.default_speed = speed
+    bot.current_speed = speed
 
     if turn_left is True:
         bot.move_left()
@@ -50,10 +60,13 @@ async def websocket_endpoint(websocket: WebSocket):
             request = await websocket.receive_json()
             act(**request)
             proximity = {
-                'front': proximity_front.get_proximity(),
-                'back': proximity_back.get_proximity()
+                'front': front_proximity.proximity,
+                'rear': rear_proximity.proximity,
             }
             await websocket.send_json(proximity)
-
     except WebSocketDisconnect:
+        bot.break_bot()
         print('Client disconnected')
+
+
+
