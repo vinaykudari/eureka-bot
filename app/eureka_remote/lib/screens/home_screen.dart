@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    dynamic proximity = {'front': 0, 'back': 0};
+    dynamic proximity = {'front': 0, 'rear': 0};
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          if (proximity['front'] > 100)
+                          if (proximity['front'] > 80)
                             Colors.red[200]
                           else
                             Colors.blue[200],
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       gradient: LinearGradient(
                         colors: [
                           Colors.white,
-                          if (proximity['back'] > 100)
+                          if (proximity['rear'] > 80)
                             Colors.red[200]
                           else
                             Colors.blue[200],
@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Center(
                       child: Padding(
                         child: Text(
-                          proximity['back'].toString() ?? '',
+                          proximity['rear'].toString() ?? '',
                           style: TextStyle(fontSize: 80, color: Colors.white),
                         ),
                         padding: EdgeInsets.fromLTRB(0, 100, 0, 60),
@@ -170,8 +170,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   value: _speed,
                   onChanged: (double value) {
                     setState(() {
-                      _speed = value;
-                      _setSpeed(value);
+                      if (value != -1) {
+                        _speed = value;
+                      }
+                      _setSpeed(_speed);
                     });
                   },
                 ),
@@ -187,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Map data = {
       'x': -1,
       'y': -1,
-      'speed': -1,
+      'speed': _speed,
       'turn_right': true,
       'turn_left': -1,
     };
@@ -198,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Map data = {
       'x': -1,
       'y': -1,
-      'speed': -1,
+      'speed': _speed,
       'turn_right': -1,
       'turn_left': true,
     };
@@ -220,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Map data = {
       'x': x,
       'y': y,
-      'speed': -1,
+      'speed': _speed,
       'turn_right': -1,
       'turn_left': -1,
     };
