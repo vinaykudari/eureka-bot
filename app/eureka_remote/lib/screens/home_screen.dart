@@ -294,9 +294,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _changeDirection(x, y) {
-    print('alpha = $_alpha');
     Map data = {
-      'x': (x + _alpha) % 360,
+      'x': (x - _alpha) % 360,
       'y': y,
       'speed': _speed,
       'turn_right': -1,
