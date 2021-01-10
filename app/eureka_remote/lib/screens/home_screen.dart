@@ -5,6 +5,7 @@ import 'package:eureka_remote/components/base/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 class HomeScreen extends StatefulWidget {
   final String title;
@@ -24,13 +25,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String endpoint;
+  String _interfaceType;
   double _speed = 50;
   dynamic _channel;
+  double _alpha = 0;
+  String initUrl = "http://192.168.1.15:8000/video/";
+  VlcPlayerController _videoViewController;
+  bool isPlaying = true;
 
   @override
   void initState() {
     super.initState();
     _channel = widget.channel;
+    _interfaceType = 'proximity';
+
+    _videoViewController = new VlcPlayerController(onInit: () {
+      _videoViewController.play();
+    });
   }
 
   @override
@@ -41,6 +52,31 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.blueGrey[500],
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                if (_interfaceType == 'proximity') {
+                  _interfaceType = 'camera';
+                  _alpha = 90;
+                } else {
+                  _interfaceType = 'proximity';
+                  _alpha = 0;
+                }
+                setState(() {
+                  _interfaceType = _interfaceType;
+                });
+              },
+              child: Icon(
+                (_interfaceType == 'proximity')
+                    ? Icons.camera_alt_outlined
+                    : Icons.car_repair,
+                size: 26.0,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,65 +101,104 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }
-              return Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(00),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          if (proximity['front'] > 80)
-                            Colors.red[200]
-                          else
-                            Colors.blue[200],
-                          Colors.white,
-                        ],
-                        begin: FractionalOffset(0.0, 0.0),
-                        end: FractionalOffset(0.0, 1.0),
-                        stops: [0, 0.8],
-                        tileMode: TileMode.clamp,
-                      ),
+              if (_interfaceType == 'proximity') {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(00),
                     ),
-                    child: Center(
-                      child: Padding(
-                        child: Text(
-                          proximity['front'].toString() ?? '',
-                          style: TextStyle(fontSize: 80, color: Colors.white),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            if (proximity['front'] > 80)
+                              Colors.red[200]
+                            else
+                              Colors.blue[200],
+                            Colors.white,
+                          ],
+                          begin: FractionalOffset(0.0, 0.0),
+                          end: FractionalOffset(0.0, 1.0),
+                          stops: [0, 0.8],
+                          tileMode: TileMode.clamp,
                         ),
-                        padding: EdgeInsets.fromLTRB(0, 80, 0, 80),
                       ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white,
-                          if (proximity['rear'] > 80)
-                            Colors.red[200]
-                          else
-                            Colors.blue[200],
-                        ],
-                        begin: FractionalOffset(0.0, 0),
-                        end: FractionalOffset(0.0, 1.0),
-                        stops: [0, 1],
-                        tileMode: TileMode.clamp,
-                      ),
-                    ),
-                    child: Center(
-                      child: Padding(
-                        child: Text(
-                          proximity['rear'].toString() ?? '',
-                          style: TextStyle(fontSize: 80, color: Colors.white),
+                      child: Center(
+                        child: Padding(
+                          child: Text(
+                            proximity['front'].toString() ?? '',
+                            style: TextStyle(fontSize: 80, color: Colors.white),
+                          ),
+                          padding: EdgeInsets.fromLTRB(0, 80, 0, 80),
                         ),
-                        padding: EdgeInsets.fromLTRB(0, 100, 0, 60),
                       ),
                     ),
-                  )
-                ],
-              );
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white,
+                            if (proximity['rear'] > 80)
+                              Colors.red[200]
+                            else
+                              Colors.blue[200],
+                          ],
+                          begin: FractionalOffset(0.0, 0),
+                          end: FractionalOffset(0.0, 1.0),
+                          stops: [0, 1],
+                          tileMode: TileMode.clamp,
+                        ),
+                      ),
+                      child: Center(
+                        child: Padding(
+                          child: Text(
+                            proximity['rear'].toString() ?? '',
+                            style: TextStyle(fontSize: 80, color: Colors.white),
+                          ),
+                          padding: EdgeInsets.fromLTRB(0, 130, 0, 60),
+                        ),
+                      ),
+                    )
+                  ],
+                );
+              } else {
+                return Container(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      RotatedBox(
+                        child: SizedBox(
+                          // height: 850,
+                          width: 500,
+                          child: VlcPlayer(
+                            aspectRatio: 16 / 9,
+                            url: initUrl,
+                            isLocalMedia: false,
+                            controller: _videoViewController,
+                            options: [
+                              '--quiet',
+                              '-vvv',
+                              '--no-drop-late-frames',
+                              '--no-skip-frames',
+                              '--rtsp-tcp',
+                            ],
+                            hwAcc: HwAcc.AUTO,
+                            placeholder: Container(
+                              height: 250.0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[CircularProgressIndicator()],
+                              ),
+                            ),
+                          ),
+                        ),
+                        quarterTurns: 5,
+                      )
+                    ],
+                  ),
+                );
+              }
             },
           ),
           Row(
@@ -220,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _changeDirection(x, y) {
     Map data = {
-      'x': x,
+      'x': (x - _alpha) % 360,
       'y': y,
       'speed': _speed,
       'turn_right': -1,
@@ -233,5 +308,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     widget.channel.sink.close();
     super.dispose();
+  }
+
+  void playOrPauseVideo() {
+    String state = _videoViewController.playingState.toString();
+
+    if (state == "PlayingState.PLAYING") {
+      _videoViewController.pause();
+      setState(() {
+        isPlaying = false;
+      });
+    } else {
+      _videoViewController.play();
+      setState(() {
+        isPlaying = true;
+      });
+    }
   }
 }
