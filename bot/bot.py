@@ -15,7 +15,7 @@ class EurekaBot(Controller):
             self,
             min_speed=10,
             max_speed=100,
-            turn_speed=30,
+            turn_speed=20,
             default_speed=50,
             acceleration_duration=0.1,
     ):
