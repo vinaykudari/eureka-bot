@@ -41,7 +41,6 @@ loop.create_task(tasks.avoid_collision())
 
 
 def act(x, y, turn_left, turn_right, speed):
-    print(f'x={x}, y={y}')
     bot.current_speed = speed
     if turn_left is True:
         bot.move_left()
