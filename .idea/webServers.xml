@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e03a031a-2064-4e6f-834f-d37bcfebae14" name="Jetson Nano">
+        <fileTransfer rootFolder="/home/eureka" accessType="SFTP" host="192.168.1.15" port="22" sshConfigId="a8a53cbb-8c32-4ce4-b3b2-4ad10f5ef151" sshConfig="eureka@192.168.1.15:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

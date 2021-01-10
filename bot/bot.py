@@ -27,6 +27,7 @@ class EurekaBot(Controller):
         self.acceleration_duration = acceleration_duration
         self.current_speed = 0
         self.current_acceleration = 0
+        self.current_direction = Direction.forward
         self.friction = 0.95
         # Found this value by experimenting
         self.rotation_constant = 0.175
@@ -73,6 +74,7 @@ class EurekaBot(Controller):
             self._set_pin_value(self.direction_pins['right'], Direction.forward.value)
 
     def set_move_direction(self, direction):
+        self.current_direction = direction
         if direction == Direction.forward:
             self._set_pin_value(self.direction_pins.values(), Direction.forward.value)
         elif direction == Direction.backward:

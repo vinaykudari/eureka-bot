@@ -3,7 +3,7 @@ import smbus
 
 
 class Proximity:
-    def __init__(self, port, threshold=50):
+    def __init__(self, port, threshold=100):
         self.port = port
         self.threshold = threshold
         self.bus = smbus.SMBus(port)
