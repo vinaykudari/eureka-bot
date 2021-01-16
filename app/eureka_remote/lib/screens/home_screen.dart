@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            if (proximity['front'] > 80)
+                            if (proximity['front'] < 100)
                               Colors.red[200]
                             else
                               Colors.blue[200],
@@ -126,8 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Center(
                         child: Padding(
                           child: Text(
-                            proximity['front'].toString() ?? '',
-                            style: TextStyle(fontSize: 80, color: Colors.white),
+                            (proximity['front'] / 10).toString() + ' cm' ?? '',
+                            style: TextStyle(fontSize: 60, color: Colors.white),
                           ),
                           padding: EdgeInsets.fromLTRB(0, 80, 0, 80),
                         ),
@@ -152,10 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Center(
                         child: Padding(
                           child: Text(
-                            proximity['rear'].toString() ?? '',
-                            style: TextStyle(fontSize: 80, color: Colors.white),
+                            (proximity['rear'] > 80 ? 'close' : 'safe'),
+                            style: TextStyle(fontSize: 40, color: Colors.white),
                           ),
-                          padding: EdgeInsets.fromLTRB(0, 130, 0, 60),
+                          padding: EdgeInsets.fromLTRB(0, 130, 0, 130),
                         ),
                       ),
                     )
