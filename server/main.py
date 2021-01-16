@@ -16,6 +16,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 from bot.sensors.proximity import Proximity
+from bot.sensors.distance import TimeOfFlight
 from bot.bot import EurekaBot
 from server.tasks import Tasks
 from server.camera import Camera
@@ -24,18 +25,20 @@ camera = Camera()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-front_proximity = Proximity(port=0, threshold=100)
-rear_proximity = Proximity(port=1, threshold=100)
+tof_sensor = TimeOfFlight()
+proximity_sensor = Proximity(port=1, threshold=100)
 
 bot = EurekaBot()
 tasks = Tasks(
-    front_proximity=front_proximity,
-    rear_proximity=rear_proximity,
+    tof=tof_sensor,
+    proximity=proximity_sensor,
     proximity_threshold=100,
+    distance_threshold=100,
     bot=bot,
 )
 
 loop = asyncio.get_event_loop()
+loop.create_task(tasks.get_distance())
 loop.create_task(tasks.get_proximity())
 loop.create_task(tasks.avoid_collision())
 
@@ -70,8 +73,8 @@ async def websocket_endpoint(websocket: WebSocket):
             request = await websocket.receive_json()
             act(**request)
             proximity = {
-                'front': front_proximity.proximity,
-                'rear': rear_proximity.proximity,
+                'front': tof_sensor.distance,
+                'rear': proximity_sensor.proximity,
             }
             await websocket.send_json(proximity)
     except WebSocketDisconnect:
